@@ -7,13 +7,23 @@ const ERPNextHelper = {
       const results = await chrome.scripting.executeScript({
         target: { tabId: tab.id },
         func: () => {
-          return !!(window.frappe || document.querySelector('.navbar-brand[href="/"]') ||
-            document.title.includes('ERPNext') || document.title.includes('Frappe'));
+          // Primary: window.frappe object (works even with custom branding)
+          if (window.frappe && window.frappe.boot) return true;
+          if (window.frappe && window.frappe.csrf_token) return true;
+          // Secondary: Frappe DOM markers
+          if (document.querySelector('[data-doctype]')) return true;
+          if (document.querySelector('.frappe-app')) return true;
+          if (document.querySelector('#navbar-main')) return true;
+          if (document.querySelector('.page-container')) return true;
+          // Tertiary: title keywords (fallback)
+          const t = document.title;
+          return t.includes('ERPNext') || t.includes('Frappe');
         }
       });
       return results[0]?.result === true;
     } catch {
-      return false;
+      // If scripting fails, assume it might be ERPNext and try anyway
+      return true;
     }
   },
 
@@ -88,6 +98,14 @@ async function init() {
   }
 
   setStatus(true, `Connected · ${new URL(tab.url).hostname}`);
+  // Show actual branded site name (works for GAWDAH, custom ERPs, etc.)
+  chrome.scripting.executeScript({
+    target: { tabId: tab.id },
+    func: () => window.frappe?._original_title || window.frappe?.boot?.sitename || null
+  }).then(r => {
+    const name = r[0]?.result;
+    if (name) document.getElementById('statusText').textContent = 'Connected · ' + name;
+  }).catch(() => {});
 
   // Load stats async
   Promise.all([
