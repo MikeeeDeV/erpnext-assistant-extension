@@ -1,0 +1,201 @@
+/* ERPNext Assistant - Content Script Styles */
+
+#erp-assistant-fab {
+  position: fixed;
+  bottom: 28px;
+  right: 24px;
+  width: 52px;
+  height: 52px;
+  background: linear-gradient(135deg, #36B54A, #27ADE1);
+  border-radius: 50%;
+  box-shadow: 0 4px 20px rgba(54,181,74,0.35), 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  z-index: 99998;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+  border: none;
+  outline: none;
+}
+#erp-assistant-fab:hover {
+  transform: scale(1.1);
+  box-shadow: 0 6px 24px rgba(54,181,74,0.45);
+}
+#erp-assistant-fab svg {
+  width: 28px;
+  height: 31px;
+}
+
+/* Chart overlay */
+#erp-chart-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(26, 46, 28, 0.55);
+  backdrop-filter: blur(3px);
+  z-index: 99999;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'DM Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+#erp-chart-modal {
+  background: #ffffff;
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.25);
+  width: 660px;
+  max-width: 95vw;
+  max-height: 88vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  animation: modalIn 0.25s ease-out;
+}
+
+@keyframes modalIn {
+  from { transform: scale(0.92) translateY(20px); opacity: 0; }
+  to { transform: scale(1) translateY(0); opacity: 1; }
+}
+
+#erp-chart-modal .modal-header {
+  background: linear-gradient(135deg, #f7f9f7 60%, #e8f8eb);
+  border-bottom: 1.5px solid #e2ede3;
+  padding: 18px 22px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+#erp-chart-modal .modal-header svg { width: 32px; height: 35px; flex-shrink: 0; }
+#erp-chart-modal .modal-header h2 {
+  font-size: 16px;
+  font-weight: 700;
+  color: #1a2e1c;
+  letter-spacing: -0.3px;
+}
+#erp-chart-modal .modal-header p {
+  font-size: 11.5px;
+  color: #5a7a5e;
+  margin-top: 1px;
+}
+#erp-chart-modal .modal-header-info { flex: 1; }
+#erp-chart-close {
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  background: white;
+  border: 1.5px solid #e2ede3;
+  cursor: pointer;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #5a7a5e;
+  transition: all 0.18s;
+}
+#erp-chart-close:hover { background: #fee2e2; border-color: #ef4444; color: #ef4444; }
+
+#erp-chart-modal .modal-body {
+  padding: 20px 22px;
+  overflow-y: auto;
+  flex: 1;
+}
+
+.erp-controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+  flex-wrap: wrap;
+}
+.erp-select {
+  flex: 1;
+  min-width: 130px;
+  padding: 9px 12px;
+  border: 1.5px solid #e2ede3;
+  border-radius: 9px;
+  font-size: 13px;
+  background: white;
+  color: #1a2e1c;
+  cursor: pointer;
+  outline: none;
+  font-family: inherit;
+}
+.erp-select:focus { border-color: #36B54A; }
+
+.erp-btn-green {
+  padding: 9px 18px;
+  background: #36B54A;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.erp-btn-green:hover { background: #2da042; box-shadow: 0 3px 12px rgba(54,181,74,.3); }
+
+.erp-btn-blue {
+  padding: 9px 16px;
+  background: #27ADE1;
+  color: white;
+  border: none;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+  white-space: nowrap;
+}
+.erp-btn-blue:hover { background: #1e9ac8; }
+
+.erp-btn-outline {
+  padding: 9px 14px;
+  background: white;
+  color: #1a2e1c;
+  border: 1.5px solid #e2ede3;
+  border-radius: 9px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+  font-family: inherit;
+}
+.erp-btn-outline:hover { background: #e8f8eb; border-color: #36B54A; color: #36B54A; }
+
+.erp-chart-wrap {
+  position: relative;
+  height: 280px;
+  margin-bottom: 16px;
+}
+
+.erp-export-row {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+.erp-stats-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+  margin-bottom: 16px;
+}
+.erp-stat {
+  background: #f7f9f7;
+  border: 1.5px solid #e2ede3;
+  border-radius: 10px;
+  padding: 12px;
+  text-align: center;
+}
+.erp-stat .val {
+  font-size: 22px;
+  font-weight: 700;
+  color: #36B54A;
+  font-family: 'DM Mono', monospace;
+  line-height: 1;
+}
+.erp-stat .val.blue { color: #27ADE1; }
+.erp-stat .lbl { font-size: 10px; color: #5a7a5e; margin-top: 3px; font-weight: 500; }

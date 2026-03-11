@@ -1,0 +1,526 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ERPNext Assistant</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+:root {
+  --green: #36B54A;
+  --blue: #27ADE1;
+  --green-light: #e8f8eb;
+  --blue-light: #e6f6fd;
+  --green-mid: #c2edca;
+  --bg: #f7f9f7;
+  --card: #ffffff;
+  --text: #1a2e1c;
+  --text-soft: #5a7a5e;
+  --border: #e2ede3;
+  --radius: 12px;
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Header */
+.header {
+  background: white;
+  border-bottom: 1.5px solid var(--border);
+  padding: 14px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.header svg { width: 28px; height: 31px; flex-shrink: 0; }
+.header h1 { font-size: 14px; font-weight: 700; letter-spacing: -0.3px; }
+.header p { font-size: 10px; color: var(--text-soft); }
+.header-info { flex: 1; }
+.conn-badge {
+  background: var(--green-light);
+  color: var(--green);
+  border: 1px solid var(--green-mid);
+  border-radius: 20px;
+  padding: 3px 9px;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  white-space: nowrap;
+}
+.conn-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--green);
+  animation: pulse 2s infinite;
+}
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* Nav tabs */
+.nav-tabs {
+  display: flex;
+  background: white;
+  border-bottom: 1.5px solid var(--border);
+  flex-shrink: 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+}
+.nav-tabs::-webkit-scrollbar { display: none; }
+.nav-tab {
+  flex: 1;
+  padding: 10px 6px;
+  border: none;
+  background: none;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-soft);
+  cursor: pointer;
+  border-bottom: 2.5px solid transparent;
+  transition: all 0.18s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3px;
+  white-space: nowrap;
+  min-width: 60px;
+}
+.nav-tab .tab-icon { font-size: 16px; }
+.nav-tab.active {
+  color: var(--green);
+  border-bottom-color: var(--green);
+  background: var(--green-light);
+}
+.nav-tab:hover:not(.active) {
+  color: var(--text);
+  background: #f0f0f0;
+}
+
+/* Content area */
+.content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 14px 14px 20px;
+}
+.tab-pane { display: none; }
+.tab-pane.active { display: block; }
+
+/* Section titles */
+.section-title {
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 1.1px;
+  text-transform: uppercase;
+  color: var(--text-soft);
+  margin-bottom: 10px;
+  margin-top: 16px;
+}
+.section-title:first-child { margin-top: 0; }
+
+/* Cards */
+.card {
+  background: var(--card);
+  border: 1.5px solid var(--border);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-bottom: 10px;
+}
+
+/* Chart section */
+.chart-controls {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.ctrl-select {
+  flex: 1;
+  min-width: 100px;
+  padding: 8px 10px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  background: white;
+  color: var(--text);
+  cursor: pointer;
+  outline: none;
+}
+.ctrl-select:focus { border-color: var(--green); }
+
+.btn-primary {
+  padding: 8px 16px;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-primary:hover { background: #2da042; box-shadow: 0 3px 10px rgba(54,181,74,.3); }
+
+.btn-secondary {
+  padding: 8px 14px;
+  background: white;
+  color: var(--text);
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-secondary:hover { background: var(--green-light); border-color: var(--green); color: var(--green); }
+
+.btn-blue {
+  padding: 8px 14px;
+  background: var(--blue);
+  color: white;
+  border: none;
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.btn-blue:hover { background: #1e9ac8; }
+
+.chart-container {
+  position: relative;
+  height: 220px;
+  margin-bottom: 10px;
+}
+
+.export-row {
+  display: flex;
+  gap: 8px;
+}
+.export-row button { flex: 1; }
+
+/* Data table */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11.5px;
+}
+.data-table th {
+  background: var(--green-light);
+  color: var(--green);
+  font-weight: 700;
+  padding: 8px 10px;
+  text-align: left;
+  border-bottom: 2px solid var(--green-mid);
+  font-size: 10.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.data-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--text);
+  font-family: 'DM Mono', monospace;
+  font-size: 11px;
+}
+.data-table tr:hover td { background: var(--green-light); }
+.data-table tr:last-child td { border-bottom: none; }
+
+/* Data entry form */
+.form-row { margin-bottom: 12px; }
+.form-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--text-soft);
+  margin-bottom: 5px;
+}
+.form-input {
+  width: 100%;
+  padding: 9px 12px;
+  border: 1.5px solid var(--border);
+  border-radius: 8px;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 12.5px;
+  background: white;
+  color: var(--text);
+  outline: none;
+  transition: border-color 0.18s;
+}
+.form-input:focus { border-color: var(--green); }
+.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+/* Notifications */
+.notif-item {
+  display: flex;
+  gap: 10px;
+  padding: 12px;
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.18s;
+}
+.notif-item:hover { border-color: var(--green); background: var(--green-light); }
+.notif-icon { font-size: 20px; flex-shrink: 0; }
+.notif-body { flex: 1; }
+.notif-title { font-size: 12.5px; font-weight: 600; margin-bottom: 2px; }
+.notif-sub { font-size: 11px; color: var(--text-soft); }
+.notif-time { font-size: 10px; color: var(--text-soft); font-family: 'DM Mono', monospace; white-space: nowrap; }
+.notif-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); align-self: flex-start; margin-top: 5px; flex-shrink: 0; }
+
+/* Loading */
+.loading {
+  text-align: center;
+  padding: 30px;
+  color: var(--text-soft);
+  font-size: 12px;
+}
+.spinner {
+  width: 24px; height: 24px;
+  border: 2.5px solid var(--border);
+  border-top-color: var(--green);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+  margin: 0 auto 10px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Summary bar */
+.summary-bar {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.summary-item {
+  background: white;
+  border: 1.5px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 8px;
+  text-align: center;
+}
+.summary-val {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--green);
+  font-family: 'DM Mono', monospace;
+  line-height: 1;
+}
+.summary-val.blue { color: var(--blue); }
+.summary-lbl { font-size: 9.5px; color: var(--text-soft); margin-top: 3px; font-weight: 500; }
+
+/* Toast */
+.toast {
+  position: fixed;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%) translateY(100px);
+  background: var(--text);
+  color: white;
+  padding: 10px 18px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 600;
+  transition: transform 0.3s;
+  z-index: 1000;
+  white-space: nowrap;
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast.green { background: var(--green); }
+.toast.blue { background: var(--blue); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <svg viewBox="0 0 56 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21.8989 61.6855C21.4635 61.6477 20.6116 61.4727 20.1809 61.3356C17.8428 60.5883 15.9212 58.6303 14.8326 55.8777C13.9807 53.7305 13.7061 50.8076 14.1179 48.2773C14.5675 45.4822 16.0679 41.8263 18.0226 38.7473C18.8982 37.3711 20.0531 35.763 21.2079 34.311C22.3438 32.878 23.6596 31.2463 24.8996 29.7234C26.8733 27.3019 26.8496 27.3303 27.0768 26.933C27.4886 26.2188 27.853 25.1216 28.0518 24.0007C28.0944 23.7689 28.1607 23.471 28.2032 23.3385L28.279 23.1021L28.3973 23.3622C28.7523 24.1568 28.8895 24.8189 28.8848 25.6986C28.8848 26.687 28.7381 27.3208 28.3168 28.2147C27.8861 29.1133 27.517 29.6194 23.7921 34.4293C19.7738 39.6128 18.8272 40.9891 17.8002 43.108C16.243 46.324 15.7413 49.2611 16.3377 51.6022C16.5933 52.6001 17.0571 53.6359 17.573 54.3595C18.5953 55.7878 20.3039 56.5209 22.6325 56.5209C24.5825 56.5256 26.3669 55.8588 28.3358 54.3926C30.5224 52.7657 32.2689 50.6563 33.2344 48.476C33.8402 47.1091 34.3892 45.2268 34.2899 44.8342C34.2473 44.6498 34.181 44.5978 33.9964 44.5978C33.7882 44.6025 33.703 44.6214 32.6712 44.9241C31.5211 45.2599 30.991 45.3545 30.2526 45.3545C29.3344 45.3545 28.8943 45.189 28.402 44.6545C27.8577 44.0681 27.5217 42.9992 27.4744 41.6749C27.4128 40.0669 27.8151 38.7237 28.828 37.1819C29.4622 36.217 30.1106 35.8529 31.204 35.8481C32.1174 35.8481 33.135 36.288 33.9112 37.0258C34.0674 37.1724 34.3419 37.494 34.5265 37.74C35.0377 38.421 35.0661 38.4494 35.2885 38.4494C35.5725 38.4494 36.3771 38.0426 36.68 37.7494C37.1296 37.3096 37.1912 36.7515 36.9356 35.2806C36.467 32.5753 36.2966 30.6362 36.2919 27.9498C36.2872 26.6019 36.3061 26.2236 36.3724 25.7742C36.6658 23.9108 37.5745 22.7805 39.1743 22.2933C39.5813 22.1703 39.6476 22.1609 40.5942 22.1609C42.0235 22.1562 42.4306 22.2366 45.7058 23.173C46.695 23.4568 47.7173 23.7406 47.9776 23.8068C49.0567 24.0763 50.3441 24.2608 51.1818 24.2608C51.5936 24.2608 51.5983 24.2608 51.5747 24.3696C51.5605 24.4263 51.5084 24.8898 51.4564 25.3959C51.2434 27.4249 51.0399 29.3119 51.002 29.5626L50.9783 29.7329L50.3772 29.7612C48.6024 29.8464 47.0547 30.7308 45.5685 32.5091C44.8065 33.4266 44.1344 34.3442 43.2068 35.763C42.3643 37.04 42.1608 37.3663 40.4333 40.1993L40.0735 40.7905L40.0783 41.1452C40.083 41.5378 40.1445 41.8499 40.6036 43.841C40.8308 44.8106 40.916 45.2741 40.9113 45.4916C40.9113 45.6572 40.9018 45.7991 40.8876 45.8085C40.8782 45.818 40.8214 45.8322 40.7598 45.8369C40.6652 45.8511 40.6178 45.7991 40.4759 45.5673C40.296 45.2741 39.3778 43.6897 38.9234 42.8904L38.6679 42.4364L37.7828 43.0512C37.3 43.3917 36.7936 43.7465 36.6611 43.8363C36.5238 43.9309 36.3913 44.0444 36.3629 44.087C36.3345 44.1295 36.3014 44.3282 36.2872 44.5221C36.273 44.7207 36.254 45.0471 36.2398 45.2504C36.0931 47.3645 35.4778 49.7151 34.4555 52.0231C32.7611 55.8493 30.7969 58.3843 28.2222 60.087C26.9159 60.9477 25.6332 61.4538 24.2891 61.6477C23.8347 61.7092 22.429 61.7328 21.8989 61.6855Z" fill="#36B54A"/>
+    <path d="M1.15902 42.8855C0.993363 42.8288 0.86084 42.772 0.86084 42.7578C0.870306 42.6585 2.86762 41.4903 5.42816 40.0809C7.47281 38.9553 8.82171 38.1513 9.75884 37.4986C10.7007 36.8459 12.6602 35.342 12.7264 35.2237C12.8116 35.0676 12.8021 34.8359 12.6933 34.2731C12.2957 32.2063 11.3822 30.0733 9.7683 27.4058C9.01576 26.1714 8.49986 24.9606 8.23008 23.8114C7.9887 22.7803 7.93664 22.2979 7.94137 20.9973C7.94611 19.9332 7.9603 19.6919 8.0739 18.94C8.53773 15.8941 9.38966 13.3922 10.6013 11.5146C11.2687 10.4788 12.22 9.33429 12.8826 8.77147C13.9002 7.90124 14.7853 7.45666 16.1531 7.1256C17.4405 6.80872 18.8698 6.8371 19.9821 7.19181C20.4743 7.35262 21.2079 7.73098 21.6433 8.06204C23.4845 9.44307 24.8286 12.2902 25.0937 15.3928C25.4108 19.0818 25.3256 21.6358 24.805 24.237C23.6312 30.0969 19.9253 35.4791 14.7995 38.7661C12.3241 40.3552 9.10568 41.6937 5.92512 42.4646C4.49577 42.8099 3.66749 42.9187 2.2334 42.9612C1.52346 42.9849 1.42406 42.9754 1.15902 42.8855Z" fill="#36B54A"/>
+    <path d="M9.45114 56.1091C8.87845 54.5389 8.75539 54.3308 8.09751 53.8011C7.72834 53.5079 6.72495 52.8221 5.40445 51.9661C4.73236 51.5309 4.41052 51.2472 4.41052 51.1053C4.41052 50.8546 4.82229 49.9134 4.95481 49.8661C5.05894 49.8236 5.92981 50.0175 6.47883 50.2019C7.44436 50.5235 7.78513 50.7553 8.60867 51.6586C8.97784 52.0606 9.0725 52.0937 9.18136 51.8667C9.24762 51.7343 9.20503 51.6444 8.52821 50.3911C8.45722 50.2634 8.22057 49.8141 8.00758 49.3979C7.78987 48.9817 7.51062 48.4757 7.38283 48.2723C7.11778 47.8514 6.96633 47.4919 6.96633 47.298C6.96633 47.0757 7.27871 45.5765 7.44436 45.0184C7.60528 44.4603 7.8088 44.0725 8.02178 43.9164C8.14011 43.8313 8.2253 43.8171 8.66073 43.8171C9.10563 43.8171 9.19556 43.8313 9.39908 43.9353C9.9907 44.238 10.3457 45.0515 10.4498 46.3663C10.4782 46.773 10.4782 46.7825 10.3835 46.7541C10.3267 46.7352 9.73512 46.5224 9.06304 46.2764C8.39569 46.0305 7.8372 45.8366 7.83246 45.846C7.78987 45.8886 8.24423 47.071 9.19083 49.3743C10.3173 52.1127 10.535 54.1038 9.93864 56.2274C9.86291 56.4969 9.78245 56.7523 9.76352 56.7902C9.73985 56.8375 9.63573 56.6104 9.45114 56.1091Z" fill="#27ADE1"/>
+    <path d="M41.2804 19.1102C41.2804 18.9825 41.5975 18.3818 41.8389 18.0555C43.7557 15.4637 50.5665 11.3726 55.1669 10.0484C55.3988 9.98217 55.5929 9.93487 55.5976 9.9396C55.6402 9.99163 55.9999 10.7247 55.9999 10.7625C55.9999 10.7862 52.8336 12.6165 48.962 14.8252C40.3575 19.7392 41.2804 19.2237 41.2804 19.1102Z" fill="#27ADE1"/>
+  </svg>
+  <div class="header-info">
+    <h1>ERPNext Assistant</h1>
+    <p id="siteUrl">Detecting site…</p>
+  </div>
+  <div class="conn-badge">
+    <div class="conn-dot"></div>
+    <span>Live</span>
+  </div>
+</div>
+
+<!-- Nav Tabs -->
+<div class="nav-tabs">
+  <button class="nav-tab active" data-tab="chart">
+    <span class="tab-icon">📊</span>
+    <span>Chart</span>
+  </button>
+  <button class="nav-tab" data-tab="data">
+    <span class="tab-icon">📋</span>
+    <span>Data</span>
+  </button>
+  <button class="nav-tab" data-tab="entry">
+    <span class="tab-icon">✏️</span>
+    <span>Entry</span>
+  </button>
+  <button class="nav-tab" data-tab="notifs">
+    <span class="tab-icon">🔔</span>
+    <span>Alerts</span>
+  </button>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- CHART TAB -->
+  <div class="tab-pane active" id="tab-chart">
+    <div class="section-title">Chart Builder</div>
+    <div class="card">
+      <div class="chart-controls">
+        <select class="ctrl-select" id="chartDoctype">
+          <option value="Sales Invoice">Sales Invoice</option>
+          <option value="Sales Order">Sales Order</option>
+          <option value="Purchase Order">Purchase Order</option>
+          <option value="Payment Entry">Payment Entry</option>
+          <option value="Item">Item</option>
+          <option value="Customer">Customer</option>
+          <option value="Supplier">Supplier</option>
+        </select>
+        <select class="ctrl-select" id="chartType">
+          <option value="bar">Bar</option>
+          <option value="line">Line</option>
+          <option value="doughnut">Doughnut</option>
+          <option value="pie">Pie</option>
+        </select>
+      </div>
+      <button class="btn-primary" id="buildChart" style="width:100%;margin-bottom:12px;">
+        ⚡ Build Chart from Current List
+      </button>
+      <div class="chart-container">
+        <canvas id="mainChart"></canvas>
+      </div>
+      <div id="chartMessage" style="text-align:center;font-size:12px;color:var(--text-soft);padding:10px 0;display:none;">
+        Open any ERPNext list view and click "Build Chart"
+      </div>
+    </div>
+
+    <div class="section-title">Export Data</div>
+    <div class="card">
+      <p style="font-size:12px;color:var(--text-soft);margin-bottom:10px;">Export current list or chart data</p>
+      <div class="export-row">
+        <button class="btn-secondary" id="exportCSV">⬇ CSV</button>
+        <button class="btn-blue" id="exportXLSX">📋 XLSX</button>
+        <button class="btn-secondary" id="exportJSON">{ } JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- DATA TAB -->
+  <div class="tab-pane" id="tab-data">
+    <div class="section-title">Live Data Browser</div>
+    <div style="display:flex;gap:8px;margin-bottom:12px;">
+      <select class="ctrl-select" id="dataDoctype">
+        <option value="Sales Invoice">Sales Invoice</option>
+        <option value="Sales Order">Sales Order</option>
+        <option value="Purchase Order">Purchase Order</option>
+        <option value="Customer">Customer</option>
+        <option value="Item">Item</option>
+        <option value="Payment Entry">Payment Entry</option>
+      </select>
+      <button class="btn-primary" id="loadData">Load</button>
+    </div>
+
+    <div class="summary-bar" id="dataSummary" style="display:none;">
+      <div class="summary-item">
+        <div class="summary-val" id="sumTotal">0</div>
+        <div class="summary-lbl">Total</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val blue" id="sumDraft">0</div>
+        <div class="summary-lbl">Draft</div>
+      </div>
+      <div class="summary-item">
+        <div class="summary-val" id="sumSubmitted">0</div>
+        <div class="summary-lbl">Submitted</div>
+      </div>
+    </div>
+
+    <div class="card" style="padding:0;overflow:hidden;">
+      <div id="dataLoading" class="loading" style="display:none;">
+        <div class="spinner"></div>Loading data…
+      </div>
+      <div id="dataTableWrap" style="overflow-x:auto;display:none;">
+        <table class="data-table" id="dataTable">
+          <thead id="dataHead"></thead>
+          <tbody id="dataBody"></tbody>
+        </table>
+      </div>
+      <div id="dataEmpty" style="text-align:center;padding:30px;color:var(--text-soft);font-size:12px;">
+        Select a doctype and click Load
+      </div>
+    </div>
+  </div>
+
+  <!-- ENTRY TAB -->
+  <div class="tab-pane" id="tab-entry">
+    <div class="section-title">Quick Data Entry</div>
+
+    <div style="display:flex;gap:8px;margin-bottom:12px;align-items:center;">
+      <select class="ctrl-select" id="entryDoctype">
+        <option value="Sales Invoice">Sales Invoice</option>
+        <option value="Sales Order">Sales Order</option>
+        <option value="Purchase Order">Purchase Order</option>
+        <option value="Customer">Customer</option>
+        <option value="Item">Item</option>
+      </select>
+    </div>
+
+    <div class="card" id="entryForm">
+      <!-- Dynamic form rendered by JS -->
+    </div>
+
+    <button class="btn-primary" id="submitEntry" style="width:100%;margin-top:4px;">
+      🚀 Create in ERPNext
+    </button>
+  </div>
+
+  <!-- NOTIFICATIONS TAB -->
+  <div class="tab-pane" id="tab-notifs">
+    <div class="section-title">Alerts & Notifications</div>
+    <div id="notifList">
+      <div class="loading"><div class="spinner"></div>Loading alerts…</div>
+    </div>
+
+    <div class="section-title" style="margin-top:16px;">Overdue Invoices</div>
+    <div id="overdueList">
+      <div class="loading"><div class="spinner"></div>Checking…</div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toast -->
+<div class="toast" id="toast"></div>
+
+<script src="sidepanel.js"></script>
+</body>
+</html>

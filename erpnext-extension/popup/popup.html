@@ -1,0 +1,382 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>ERPNext Assistant</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600;700&family=DM+Mono:wght@400;500&display=swap');
+
+  :root {
+    --green: #36B54A;
+    --blue: #27ADE1;
+    --green-light: #e8f8eb;
+    --blue-light: #e6f6fd;
+    --green-mid: #c2edca;
+    --bg: #f7f9f7;
+    --card: #ffffff;
+    --text: #1a2e1c;
+    --text-soft: #5a7a5e;
+    --border: #e2ede3;
+    --shadow: 0 2px 12px rgba(54,181,74,0.10);
+    --radius: 12px;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    width: 360px;
+    min-height: 480px;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* Header */
+  .header {
+    background: linear-gradient(135deg, #fff 60%, var(--green-light));
+    border-bottom: 1.5px solid var(--border);
+    padding: 16px 18px 14px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    position: relative;
+  }
+  .header-logo {
+    width: 36px;
+    height: 40px;
+    flex-shrink: 0;
+  }
+  .header-title {
+    flex: 1;
+  }
+  .header-title h1 {
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--text);
+    letter-spacing: -0.3px;
+  }
+  .header-title p {
+    font-size: 11px;
+    color: var(--text-soft);
+    margin-top: 1px;
+  }
+  .header-sidepanel-btn {
+    width: 30px;
+    height: 30px;
+    border-radius: 8px;
+    border: 1.5px solid var(--border);
+    background: white;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-soft);
+    transition: all 0.2s;
+  }
+  .header-sidepanel-btn:hover {
+    background: var(--green-light);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  /* Status bar */
+  .status-bar {
+    padding: 8px 18px;
+    background: var(--green-light);
+    border-bottom: 1px solid var(--green-mid);
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--green);
+    font-weight: 500;
+  }
+  .status-dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    animation: pulse 2s infinite;
+  }
+  @keyframes pulse {
+    0%,100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+  .status-bar.inactive {
+    background: #f5f5f5;
+    border-color: #e0e0e0;
+    color: #999;
+  }
+  .status-bar.inactive .status-dot { background: #bbb; animation: none; }
+
+  /* Quick actions */
+  .section { padding: 14px 18px 0; }
+  .section-label {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.2px;
+    text-transform: uppercase;
+    color: var(--text-soft);
+    margin-bottom: 10px;
+  }
+
+  .quick-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .quick-btn {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 6px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    cursor: pointer;
+    transition: all 0.18s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .quick-btn:hover {
+    background: var(--green-light);
+    border-color: var(--green);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(54,181,74,0.15);
+  }
+  .quick-btn .icon {
+    font-size: 20px;
+  }
+  .quick-btn span {
+    font-size: 10.5px;
+    font-weight: 600;
+    color: var(--text);
+    text-align: center;
+    line-height: 1.2;
+  }
+  .quick-btn.blue:hover {
+    background: var(--blue-light);
+    border-color: var(--blue);
+    box-shadow: 0 4px 12px rgba(39,173,225,0.15);
+  }
+
+  /* Stats row */
+  .stats-row {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 14px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 10px 10px 8px;
+    text-align: center;
+  }
+  .stat-card .val {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--green);
+    font-family: 'DM Mono', monospace;
+    line-height: 1;
+  }
+  .stat-card.blue .val { color: var(--blue); }
+  .stat-card .lbl {
+    font-size: 9.5px;
+    color: var(--text-soft);
+    margin-top: 3px;
+    font-weight: 500;
+  }
+
+  /* Recent activity */
+  .activity-list { margin-bottom: 6px; }
+  .activity-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .activity-item:last-child { border-bottom: none; }
+  .activity-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+  .activity-dot.green { background: var(--green); }
+  .activity-dot.blue { background: var(--blue); }
+  .activity-dot.orange { background: #f59e0b; }
+  .activity-text {
+    flex: 1;
+    font-size: 11.5px;
+    color: var(--text);
+    font-weight: 500;
+  }
+  .activity-time {
+    font-size: 10px;
+    color: var(--text-soft);
+    font-family: 'DM Mono', monospace;
+  }
+
+  /* Footer */
+  .footer {
+    padding: 10px 18px 14px;
+    display: flex;
+    gap: 8px;
+  }
+  .footer-btn {
+    flex: 1;
+    padding: 9px;
+    border-radius: 9px;
+    border: 1.5px solid var(--border);
+    background: var(--card);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.18s;
+    color: var(--text);
+  }
+  .footer-btn.primary {
+    background: var(--green);
+    border-color: var(--green);
+    color: white;
+  }
+  .footer-btn.primary:hover {
+    background: #2da042;
+    box-shadow: 0 3px 10px rgba(54,181,74,0.3);
+  }
+  .footer-btn:not(.primary):hover {
+    background: var(--green-light);
+    border-color: var(--green);
+    color: var(--green);
+  }
+
+  #not-erpnext {
+    padding: 32px 18px;
+    text-align: center;
+    display: none;
+  }
+  #not-erpnext .big-icon { font-size: 40px; margin-bottom: 12px; }
+  #not-erpnext h3 { font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  #not-erpnext p { font-size: 12px; color: var(--text-soft); line-height: 1.5; }
+
+  #erpnext-ui { display: block; }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="header">
+  <svg class="header-logo" viewBox="0 0 56 62" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <path d="M21.8989 61.6855C21.4635 61.6477 20.6116 61.4727 20.1809 61.3356C17.8428 60.5883 15.9212 58.6303 14.8326 55.8777C13.9807 53.7305 13.7061 50.8076 14.1179 48.2773C14.5675 45.4822 16.0679 41.8263 18.0226 38.7473C18.8982 37.3711 20.0531 35.763 21.2079 34.311C22.3438 32.878 23.6596 31.2463 24.8996 29.7234C26.8733 27.3019 26.8496 27.3303 27.0768 26.933C27.4886 26.2188 27.853 25.1216 28.0518 24.0007C28.0944 23.7689 28.1607 23.471 28.2032 23.3385L28.279 23.1021L28.3973 23.3622C28.7523 24.1568 28.8895 24.8189 28.8848 25.6986C28.8848 26.687 28.7381 27.3208 28.3168 28.2147C27.8861 29.1133 27.517 29.6194 23.7921 34.4293C19.7738 39.6128 18.8272 40.9891 17.8002 43.108C16.243 46.324 15.7413 49.2611 16.3377 51.6022C16.5933 52.6001 17.0571 53.6359 17.573 54.3595C18.5953 55.7878 20.3039 56.5209 22.6325 56.5209C24.5825 56.5256 26.3669 55.8588 28.3358 54.3926C30.5224 52.7657 32.2689 50.6563 33.2344 48.476C33.8402 47.1091 34.3892 45.2268 34.2899 44.8342C34.2473 44.6498 34.181 44.5978 33.9964 44.5978C33.7882 44.6025 33.703 44.6214 32.6712 44.9241C31.5211 45.2599 30.991 45.3545 30.2526 45.3545C29.3344 45.3545 28.8943 45.189 28.402 44.6545C27.8577 44.0681 27.5217 42.9992 27.4744 41.6749C27.4128 40.0669 27.8151 38.7237 28.828 37.1819C29.4622 36.217 30.1106 35.8529 31.204 35.8481C32.1174 35.8481 33.135 36.288 33.9112 37.0258C34.0674 37.1724 34.3419 37.494 34.5265 37.74C35.0377 38.421 35.0661 38.4494 35.2885 38.4494C35.5725 38.4494 36.3771 38.0426 36.68 37.7494C37.1296 37.3096 37.1912 36.7515 36.9356 35.2806C36.467 32.5753 36.2966 30.6362 36.2919 27.9498C36.2872 26.6019 36.3061 26.2236 36.3724 25.7742C36.6658 23.9108 37.5745 22.7805 39.1743 22.2933C39.5813 22.1703 39.6476 22.1609 40.5942 22.1609C42.0235 22.1562 42.4306 22.2366 45.7058 23.173C46.695 23.4568 47.7173 23.7406 47.9776 23.8068C49.0567 24.0763 50.3441 24.2608 51.1818 24.2608C51.5936 24.2608 51.5983 24.2608 51.5747 24.3696C51.5605 24.4263 51.5084 24.8898 51.4564 25.3959C51.2434 27.4249 51.0399 29.3119 51.002 29.5626L50.9783 29.7329L50.3772 29.7612C48.6024 29.8464 47.0547 30.7308 45.5685 32.5091C44.8065 33.4266 44.1344 34.3442 43.2068 35.763C42.3643 37.04 42.1608 37.3663 40.4333 40.1993L40.0735 40.7905L40.0783 41.1452C40.083 41.5378 40.1445 41.8499 40.6036 43.841C40.8308 44.8106 40.916 45.2741 40.9113 45.4916C40.9113 45.6572 40.9018 45.7991 40.8876 45.8085C40.8782 45.818 40.8214 45.8322 40.7598 45.8369C40.6652 45.8511 40.6178 45.7991 40.4759 45.5673C40.296 45.2741 39.3778 43.6897 38.9234 42.8904L38.6679 42.4364L37.7828 43.0512C37.3 43.3917 36.7936 43.7465 36.6611 43.8363C36.5238 43.9309 36.3913 44.0444 36.3629 44.087C36.3345 44.1295 36.3014 44.3282 36.2872 44.5221C36.273 44.7207 36.254 45.0471 36.2398 45.2504C36.0931 47.3645 35.4778 49.7151 34.4555 52.0231C32.7611 55.8493 30.7969 58.3843 28.2222 60.087C26.9159 60.9477 25.6332 61.4538 24.2891 61.6477C23.8347 61.7092 22.429 61.7328 21.8989 61.6855ZM39.108 35.1056C39.4677 34.6374 40.3102 33.5401 42.9938 30.0545C43.7937 29.014 44.4516 28.1485 44.4516 28.1343C44.4516 28.1201 44.338 28.087 44.2054 28.0586C44.0682 28.0302 43.699 27.9546 43.3866 27.8836C42.5252 27.6992 41.1574 27.5573 40.1682 27.5525C39.3873 27.5478 39.2973 27.5573 39.0938 27.6519C38.6489 27.8552 38.2088 28.3944 38.0857 28.8721C37.9484 29.4207 37.9863 30.2342 38.275 32.9395C38.4596 34.6563 38.6253 35.6495 38.7199 35.5927C38.7389 35.5786 38.914 35.361 39.108 35.1056Z" fill="#36B54A"/>
+    <path d="M1.15902 42.8855C0.993363 42.8288 0.86084 42.772 0.86084 42.7578C0.870306 42.6585 2.86762 41.4903 5.42816 40.0809C7.47281 38.9553 8.82171 38.1513 9.75884 37.4986C10.7007 36.8459 12.6602 35.342 12.7264 35.2237C12.8116 35.0676 12.8021 34.8359 12.6933 34.2731C12.2957 32.2063 11.3822 30.0733 9.7683 27.4058C9.01576 26.1714 8.49986 24.9606 8.23008 23.8114C7.9887 22.7803 7.93664 22.2979 7.94137 20.9973C7.94611 19.9332 7.9603 19.6919 8.0739 18.94C8.53773 15.8941 9.38966 13.3922 10.6013 11.5146C11.2687 10.4788 12.22 9.33429 12.8826 8.77147C13.9002 7.90124 14.7853 7.45666 16.1531 7.1256C17.4405 6.80872 18.8698 6.8371 19.9821 7.19181C20.4743 7.35262 21.2079 7.73098 21.6433 8.06204C23.4845 9.44307 24.8286 12.2902 25.0937 15.3928C25.4108 19.0818 25.3256 21.6358 24.805 24.237C23.6312 30.0969 19.9253 35.4791 14.7995 38.7661C12.3241 40.3552 9.10568 41.6937 5.92512 42.4646C4.49577 42.8099 3.66749 42.9187 2.2334 42.9612C1.52346 42.9849 1.42406 42.9754 1.15902 42.8855ZM15.7934 32.6319C16.8725 31.5158 18.0131 30.3192 18.4202 29.8652C19.5135 28.6497 20.5595 27.245 21.4162 25.864C22.7083 23.7641 23.2005 22.3972 23.21 20.9027C23.2147 20.3162 23.1958 20.1744 23.0538 19.4839C22.6089 17.3556 21.6717 15.582 20.285 14.2293C19.3668 13.3402 18.548 12.9382 17.2843 12.7679C16.5933 12.6733 15.7224 12.7916 15.003 13.0801C14.6101 13.2409 13.7629 13.8037 13.2612 14.2435C12.3004 15.0854 11.5006 16.1543 10.89 17.4265C10.3836 18.4717 10.2037 19.3893 10.3457 20.2122C10.3836 20.4629 10.4735 20.7987 10.5398 20.9595C10.7528 21.4797 11.4201 22.5722 13.0104 24.989C13.4364 25.6322 13.8576 26.2944 13.9428 26.4552C14.1416 26.8288 14.4161 27.5146 14.5107 27.8882C14.7285 28.7301 14.79 29.9597 14.6811 31.3077C14.5959 32.4049 14.5912 32.4995 14.5628 33.0103C14.5486 33.2846 14.5249 33.6015 14.5107 33.715L14.4823 33.9278L14.6906 33.7434C14.7995 33.6441 15.3012 33.1427 15.7934 32.6319Z" fill="#36B54A"/>
+    <path d="M49.3976 42.337C49.1136 42.285 45.8289 40.9654 45.649 40.833C45.4503 40.6817 45.4408 40.5587 45.597 39.9628C45.668 39.6885 45.8715 38.8797 46.0419 38.1656C46.4158 36.619 46.5436 36.2028 46.695 36.0136C46.7992 35.8859 46.837 35.8717 47.0642 35.8765C47.4807 35.8859 50.1832 36.8413 50.6045 37.1298C50.9973 37.3946 51.1488 37.7304 51.092 38.2034C51.0683 38.4304 51.073 38.4493 51.1677 38.4493C51.2198 38.4493 51.2671 38.473 51.2671 38.4966C51.2671 38.525 51.1819 38.7709 51.0825 39.0547C50.9831 39.3338 50.7559 39.9533 50.5808 40.4357C50.1359 41.6654 49.9418 42.1526 49.8756 42.2235C49.7999 42.2992 49.5301 42.3654 49.3976 42.337Z" fill="#36B54A"/>
+    <path d="M31.8288 24.2371C30.8585 24.1094 30.4657 23.9486 30.0586 23.5182C29.9308 23.381 29.7605 23.1351 29.6847 22.9743C29.4339 22.4304 29.3913 22.1892 29.3771 21.2102C29.3298 17.6205 30.0918 13.8889 31.417 11.1741C32.0323 9.92079 32.941 9.11204 34.0675 8.81881C34.4698 8.71476 35.2176 8.72422 35.6767 8.84245C36.1594 8.96542 36.7274 9.24919 37.1013 9.55188C37.887 10.1856 38.4218 11.2356 38.6868 12.6497C38.7673 13.0896 38.7862 13.4301 38.8052 14.8348C38.8383 17.2988 38.7342 18.5096 38.3745 19.7487C37.6787 22.1419 36.1973 23.7263 34.2331 24.1708C33.6936 24.2938 32.4914 24.3269 31.8288 24.2371ZM34.5124 18.7981C35.1276 18.5995 35.4637 18.4197 36.1263 17.909C36.5759 17.5684 36.7369 17.3461 36.8031 16.9725C36.8315 16.7881 36.7132 16.1732 36.5996 15.9084C36.344 15.3361 35.6577 14.655 35.033 14.3571C34.484 14.097 33.9681 14.1679 33.1966 14.6172C32.8511 14.8206 32.1222 15.5537 31.9187 15.8989C31.4265 16.736 31.346 17.8995 31.7436 18.4245C32.1269 18.9258 33.5184 19.1103 34.5124 18.7981Z" fill="#36B54A"/>
+    <path d="M28.3878 7.83961C28.2837 7.74975 28.2458 7.67408 28.2316 7.48963C28.2174 7.33828 28.3499 6.37819 28.6197 4.68029C28.8469 3.26143 29.0362 2.09797 29.0457 2.08851C29.0552 2.07905 29.8219 1.8946 30.7543 1.67231C32.638 1.22773 34.7679 0.707486 35.7429 0.447362C36.6658 0.196697 36.9829 0.234533 37.2763 0.631813C37.371 0.754781 37.3757 0.816265 37.3663 1.73852C37.3521 2.8074 37.2432 4.23571 37.1391 4.74177C37.0397 5.22891 36.8551 5.55525 36.4528 5.95726C36.1641 6.25049 36.0126 6.35927 35.6387 6.53899C34.1999 7.24369 31.4974 7.83015 29.235 7.92474C28.5251 7.95785 28.5203 7.95785 28.3878 7.83961Z" fill="#36B54A"/>
+    <path d="M9.45114 56.1091C8.87845 54.5389 8.75539 54.3308 8.09751 53.8011C7.72834 53.5079 6.72495 52.8221 5.40445 51.9661C4.73236 51.5309 4.41052 51.2472 4.41052 51.1053C4.41052 50.8546 4.82229 49.9134 4.95481 49.8661C5.05894 49.8236 5.92981 50.0175 6.47883 50.2019C7.44436 50.5235 7.78513 50.7553 8.60867 51.6586C8.97784 52.0606 9.0725 52.0937 9.18136 51.8667C9.24762 51.7343 9.20503 51.6444 8.52821 50.3911C8.45722 50.2634 8.22057 49.8141 8.00758 49.3979C7.78987 48.9817 7.51062 48.4757 7.38283 48.2723C7.11778 47.8514 6.96633 47.4919 6.96633 47.298C6.96633 47.0757 7.27871 45.5765 7.44436 45.0184C7.60528 44.4603 7.8088 44.0725 8.02178 43.9164C8.14011 43.8313 8.2253 43.8171 8.66073 43.8171C9.10563 43.8171 9.19556 43.8313 9.39908 43.9353C9.9907 44.238 10.3457 45.0515 10.4498 46.3663C10.4782 46.773 10.4782 46.7825 10.3835 46.7541C10.3267 46.7352 9.73512 46.5224 9.06304 46.2764C8.39569 46.0305 7.8372 45.8366 7.83246 45.846C7.78987 45.8886 8.24423 47.071 9.19083 49.3743C10.3173 52.1127 10.535 54.1038 9.93864 56.2274C9.86291 56.4969 9.78245 56.7523 9.76352 56.7902C9.73985 56.8375 9.63573 56.6104 9.45114 56.1091Z" fill="#27ADE1"/>
+    <path d="M41.2804 19.1102C41.2804 18.9825 41.5975 18.3818 41.8389 18.0555C43.7557 15.4637 50.5665 11.3726 55.1669 10.0484C55.3988 9.98217 55.5929 9.93487 55.5976 9.9396C55.6402 9.99163 55.9999 10.7247 55.9999 10.7625C55.9999 10.7862 52.8336 12.6165 48.962 14.8252C40.3575 19.7392 41.2804 19.2237 41.2804 19.1102Z" fill="#27ADE1"/>
+  </svg>
+  <div class="header-title">
+    <h1>ERPNext Assistant</h1>
+    <p>Powered by Frappe</p>
+  </div>
+  <button class="header-sidepanel-btn" id="openSidePanel" title="Open Side Panel">
+    <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+      <rect x="3" y="3" width="18" height="18" rx="2"/>
+      <line x1="15" y1="3" x2="15" y2="21"/>
+    </svg>
+  </button>
+</div>
+
+<!-- Not ERPNext notice -->
+<div id="not-erpnext">
+  <div class="big-icon">🔍</div>
+  <h3>Not on ERPNext</h3>
+  <p>Navigate to your ERPNext instance to use the assistant.</p>
+</div>
+
+<!-- Main ERPNext UI -->
+<div id="erpnext-ui">
+  <!-- Status -->
+  <div class="status-bar" id="statusBar">
+    <div class="status-dot"></div>
+    <span id="statusText">Connected to ERPNext</span>
+  </div>
+
+  <!-- Quick Actions -->
+  <div class="section">
+    <div class="section-label">Quick Actions</div>
+    <div class="quick-grid">
+      <button class="quick-btn" data-action="new-invoice">
+        <span class="icon">🧾</span>
+        <span>New Invoice</span>
+      </button>
+      <button class="quick-btn" data-action="new-order">
+        <span class="icon">📦</span>
+        <span>Sales Order</span>
+      </button>
+      <button class="quick-btn" data-action="new-purchase">
+        <span class="icon">🛒</span>
+        <span>Purchase</span>
+      </button>
+      <button class="quick-btn blue" data-action="chart">
+        <span class="icon">📊</span>
+        <span>Chart View</span>
+      </button>
+      <button class="quick-btn blue" data-action="export">
+        <span class="icon">⬇️</span>
+        <span>Export CSV</span>
+      </button>
+      <button class="quick-btn blue" data-action="export-xlsx">
+        <span class="icon">📋</span>
+        <span>Export XLSX</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Live Stats -->
+  <div class="section">
+    <div class="section-label">Live Stats</div>
+    <div class="stats-row">
+      <div class="stat-card">
+        <div class="val" id="stat1">—</div>
+        <div class="lbl">Open Orders</div>
+      </div>
+      <div class="stat-card blue">
+        <div class="val" id="stat2">—</div>
+        <div class="lbl">Invoices</div>
+      </div>
+      <div class="stat-card">
+        <div class="val" id="stat3">—</div>
+        <div class="lbl">Items</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Activity -->
+  <div class="section">
+    <div class="section-label">Recent Activity</div>
+    <div class="activity-list" id="activityList">
+      <div class="activity-item">
+        <div class="activity-dot green"></div>
+        <div class="activity-text">Loading activity…</div>
+        <div class="activity-time">—</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Footer -->
+  <div class="footer">
+    <button class="footer-btn" id="openSidePanelFooter">Side Panel</button>
+    <button class="footer-btn primary" id="openDashboard">Open Dashboard</button>
+  </div>
+</div>
+
+<script src="popup.js"></script>
+</body>
+</html>
