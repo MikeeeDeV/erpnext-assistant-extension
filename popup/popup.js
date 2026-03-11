@@ -170,7 +170,7 @@ async function init() {
   // Dashboard
   document.getElementById('openDashboard').addEventListener('click', () => {
     const base = ERPNextHelper.getBaseUrl(tab.url);
-    chrome.tabs.create({ url: `${base}/dashboard` });
+    chrome.tabs.create({ url: `${base}/app` });
   });
 }
 
